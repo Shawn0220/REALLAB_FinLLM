@@ -1,2 +1,5 @@
 stockllm_env/
 Data/
+data_collection/fundemental.ipynb
+output_sec/
+.env
