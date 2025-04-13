@@ -32,9 +32,9 @@ manager = get_manager_agent(llm_config)
 completeness_checker = get_completeness_check_agent(llm_config)
 
 # === Tool registration ===
-register_tool(user_proxy, analyst, data_collect_company_info, "data_collect_company_info", "Collects company info data.")
-register_tool(user_proxy, analyst, data_collect_stock_price_history, "data_collect_stock_price_history", "Collects stock price history.")
-register_tool(user_proxy, analyst, data_collect_social_sentiment, "data_collect_social_sentiment", "Collects social sentiment data.")
+register_tool(user_proxy, analyst)
+register_tool(user_proxy, analyst)
+register_tool(user_proxy, analyst)
 
 # === Setup Debate Group ===
 debate_mgr = create_debate_group(bullish, bearish)
