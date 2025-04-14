@@ -12,7 +12,10 @@ from agents.recommender_agent import get_recommender_agent
 from agents.risk_manager_agent import get_risk_manager_agent
 from agents.manager_agent import get_manager_agent
 from agents.completeness_checker import get_completeness_check_agent
+from agents.calculator_agent import get_calculator_agent
+from agents.summary_agent import get_summary_agent
 from agents.user_proxy import get_user_proxy
+
 
 from functions.tool_registration import register_tool
 from functions.stock_data import *
@@ -30,14 +33,16 @@ recommender = get_recommender_agent(llm_config)
 risk_manager = get_risk_manager_agent(llm_config)
 manager = get_manager_agent(llm_config)
 completeness_checker = get_completeness_check_agent(llm_config)
+calculator_agent = get_calculator_agent(llm_config)
+summary_agent = get_summary_agent(llm_config)
 
 # === Tool registration ===
 register_tool(user_proxy, analyst)
-register_tool(user_proxy, analyst)
-register_tool(user_proxy, analyst)
+register_tool(calculator_agent, bullish)
+register_tool(calculator_agent, bearish)
 
 # === Setup Debate Group ===
-debate_mgr = create_debate_group(bullish, bearish)
+debate_mgr = create_debate_group(bullish, bearish, calculator_agent, summary_agent)
 
 # === Assemble Agent Dict ===
 agents = {

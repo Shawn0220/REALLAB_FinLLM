@@ -25,20 +25,22 @@ def run_stock_recommendation(
 
     # 获取 analyst 最后一条消息（即工具调用返回值）
     stock_data_response = get_last_reply_from(agents["analyst_agent"])
-    print("Raw analyst response:", stock_data_response)
+    # print("Raw analyst response:", stock_data_response)
 
-    stock_data_str = stock_data_response
+    pass_data_to_analyze_prompt = "The following stock data is available:\n" + stock_data_response + "You are now in a team discussion. \nBullish researcher: explain why this stock is promising.\nBearish researcher: explain the risks and why it might not be a good investment.\nCalculator agent: focus on function call caculation and not giving any idea output.\nSummary agent: only work when neither of Bullish researcher/Bearish researcher has any further arguments, make summaries for both sides."
+    pass_data_to_analyze_prompt = re.sub(r"(?i)terminate", "", pass_data_to_analyze_prompt)
 
     print("\n=== Step 2: Bullish vs Bearish Debate ===")
-    user_proxy.initiate_chat(debate_manager, message=f"The following stock data is available:\n{stock_data_str}")
+    user_proxy.initiate_chat(debate_manager, message=pass_data_to_analyze_prompt)
 
     debate_summary = "\n--- Debate Summary ---\n"
     for msg in debate_manager.groupchat.messages:
-        debate_summary += f"{msg['name']}: {msg['content']}\n"
+        if msg['name'] == "summary_agent":
+            debate_summary += f"{msg['name']}: {msg['content']}\n"
 
     print("\n=== Step 3: Trader makes a decision ===")
     trader_prompt = (
-        f"{stock_data_str}\n"
+        f"{pass_data_to_analyze_prompt}\n"
         f"{debate_summary}\n"
         "Based on the above, please make a BUY or SELL decision with reasoning.\n"
     )
@@ -51,7 +53,7 @@ def run_stock_recommendation(
 
     print("\n=== Step 4: Risk Management Team reviews ===")
     risk_prompt = (
-        f"{stock_data_str}\n\n"
+        f"{pass_data_to_analyze_prompt}\n\n"
         f"{debate_summary}\n"
         f"Trader's Decision:\n{trader_decision}\n\n"
         f"Current Risk Profile: {risk_profile}\n"
@@ -65,7 +67,7 @@ def run_stock_recommendation(
 
     print("\n=== Step 5: Manager makes final decision ===")
     manager_prompt = (
-        f"{stock_data_str}\n\n"
+        f"{pass_data_to_analyze_prompt}\n\n"
         f"{debate_summary}\n"
         f"Trader's Decision:\n{trader_decision}\n\n"
         f"Risk Management Team's Decision:\n{risk_decision}\n\n"

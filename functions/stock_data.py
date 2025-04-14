@@ -53,14 +53,15 @@ def data_collect(stock_name):
         "social_media_sentiment": "Mixed, trending positive."
     }
 
-# 提供函数注册所需元信息
 data_collect._tool_config = {
     "name": "data_collect",
     "description": "Collects company info, stock price history, and sentiment."
 }
 
-# 用户也可以自己写函数
-def get_moving_average(stock_name, window=3):
+
+
+
+def get_moving_average(stock_name: str, window: int = 3) -> float:
     return sum([120, 123, 119][-window:]) / window
 
 get_moving_average._tool_config = {
