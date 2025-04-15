@@ -44,3 +44,50 @@ class AlphaVantageNewsFetcher:
                         data = await response.json()
                         return {ticker: data.get("feed", [])}
                     return {ticker: None}
+
+
+async def fetch_all_news(tickers, api_key, time_from, time_to, sort="RELEVANCE", max_concurrent_requests=25):
+    """
+    Fetch news for a list of company of ticker using AlphaVantageNewsFetcher.
+
+    Args:
+        tickers (list): List of ticker symbols.
+        api_key (str): Alpha Vantage API key.
+        time_from (str): Start time.
+        time_to (str): End time.
+        sort (str): Sort order(Latest, Earliest) 
+        max_concurrent_requests (int): Max concurrent requests.
+
+    Returns:
+        dict: Dictionary of ticker to news data.
+    """
+    fetcher = AlphaVantageNewsFetcher(api_key, time_from, time_to, sort, max_concurrent_requests)
+    results = {}
+
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetcher.fetch_news(ticker, session=session) for ticker in tickers]
+        responses = await asyncio.gather(*tasks)
+
+        for r in responses:
+            results.update(r)
+
+    return results
+
+
+async def fetch_single_news(ticker, api_key, time_from, time_to, sort="RELEVANCE"):
+    """
+    Fetch news for a single ticker symbol.
+
+    Args:
+        ticker (str): Stock ticker.
+        api_key (str): Alpha Vantage API key.
+        time_from (str): Start time.
+        time_to (str): End time.
+        sort (str): Sorting order.
+
+    Returns:
+        dict: Ticker -> News feed list
+    """
+    fetcher = AlphaVantageNewsFetcher(api_key, time_from, time_to, sort)
+    async with aiohttp.ClientSession() as session:
+        return await fetcher.fetch_news(ticker, session=session)
