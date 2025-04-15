@@ -3,3 +3,4 @@ Data/
 data_collection/*.ipynb
 output_sec/
 .env
+*__pycache__
