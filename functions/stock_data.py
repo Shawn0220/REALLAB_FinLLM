@@ -1,6 +1,8 @@
 import asyncio
 from data_collection.alvan_dc.news_fetcher import fetch_single_news
+from data_collection.alvan_dc.historical_price import fetch_ticker_symbol
 from config.api_config import MAX_articles
+
 
 # === Tool 1: Company Info ===
 def data_collect_company_info(stock_name: str) -> str:
@@ -129,6 +131,43 @@ get_stock_news_sentiment._tool_config = {
             "type": "string",
             "description": "Sorting order for results, such as 'RELEVANCE' or 'LATEST'.",
             "default": "RELEVANCE"
+        }
+    }
+}
+
+
+def get_stock_price_history(ticker: str, outputsize: str = "compact") -> dict:
+    """
+    Synchronously fetch historical adjusted daily stock price data for a single stock ticker.
+    Internally calls the async `fetch_ticker_symbol` function.
+
+    Args:
+        ticker (str): The stock ticker symbol, e.g., 'AAPL'.
+        outputsize (str): 'compact' for latest 100 points, 'full' for full history. Considering context window, better not to use 'full'
+
+    Returns:
+        dict: A dictionary containing the historical stock price data.
+    """
+    return asyncio.run(fetch_ticker_symbol(ticker, outputsize))
+
+get_stock_price_history._tool_config = {
+    "name": "fetch_stock_price_history",
+    "description": (
+        "Fetches historical adjusted daily stock price data for a single stock ticker. "
+        "Requires the following parameters: "
+        "`ticker` is the stock ticker symbol (e.g., 'AAPL'); "
+        "`outputsize` determines how much historical data to return; "
+        "use 'compact' to get the latest 100 data points or 'full' to get the complete history."
+    ),
+    "parameters": {
+        "ticker": {
+            "type": "string",
+            "description": "The stock ticker symbol, e.g., 'AAPL'."
+        },
+        "outputsize": {
+            "type": "string",
+            "description": "Amount of historical data to retrieve: 'compact' (latest 100 points) or 'full' (entire history).",
+            "default": "compact"
         }
     }
 }

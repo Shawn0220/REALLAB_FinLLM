@@ -1,5 +1,6 @@
 import asyncio
 import aiohttp
+from config.api_config import api_keys
 
 class AlphaVantageHistPriceFetcher:
     def __init__(self, api_key:str, outputsize:str="compact", datatype:str="json", max_concurrent_requests:int=25):
@@ -56,7 +57,7 @@ class AlphaVantageHistPriceFetcher:
                     return {ticker: None}
 
 
-async def fetch_single_adjdaily(ticker:str, api_key:str, outputsize:str="compact", datatype:str="json"):
+async def fetch_single_adjdaily(ticker:str, outputsize:str="compact", datatype:str="json"):
     """
     Fetch news for a single ticker symbol.
 
@@ -69,6 +70,22 @@ async def fetch_single_adjdaily(ticker:str, api_key:str, outputsize:str="compact
     Returns:
         dict: Ticker -> News feed list
     """
-    fetcher = AlphaVantageHistPriceFetcher(api_key, outputsize, datatype)
+    fetcher = AlphaVantageHistPriceFetcher(api_keys["alphavantage"], outputsize, datatype)
+    async with aiohttp.ClientSession() as session:
+        return await fetcher.fetch_adjdaily(ticker, session=session)
+    
+
+async def fetch_ticker_symbol(ticker:str, outputsize:str="compact"):
+    """
+    Fetch news for a single ticker symbol.
+
+    Args:
+        ticker (str): Stock ticker.
+        outputsize (str): 'compact' for latest 100 points, 'full' for full history.
+
+    Returns:
+        dict: Ticker -> News feed list
+    """
+    fetcher = AlphaVantageHistPriceFetcher(api_keys["alphavantage"], outputsize, "json")
     async with aiohttp.ClientSession() as session:
         return await fetcher.fetch_adjdaily(ticker, session=session)
