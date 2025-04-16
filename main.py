@@ -1,5 +1,5 @@
 from autogen import UserProxyAgent
-from config.llm_config import llm_config
+from config.api_config import llm_config
 from orchestrator.stock_recommendation_workflow import run_stock_recommendation
 from orchestrator.debate_group import create_debate_group
 

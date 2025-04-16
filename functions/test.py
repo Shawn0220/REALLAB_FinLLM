@@ -1,6 +1,14 @@
+
+import asyncio
+
 import asyncio
 import aiohttp
-from config.api_config import api_keys
+import os
+
+
+ALPHAVANTAGE_API_KEY = os.environ.get("ALPHAVANTAGE_API_KEY")
+print(ALPHAVANTAGE_API_KEY)
+
 
 class AlphaVantageNewsFetcher:
     def __init__(self, api_key, time_from, time_to, sort="RELEVANCE", max_concurrent_requests=25):
@@ -88,7 +96,34 @@ async def fetch_single_news(ticker, time_from, time_to, sort="RELEVANCE"):
     Returns:
         dict: Ticker -> News feed list
     """
-    print(api_keys["alphavantage"])
-    fetcher = AlphaVantageNewsFetcher(api_keys["alphavantage"], time_from, time_to, sort)
+
+    fetcher = AlphaVantageNewsFetcher(ALPHAVANTAGE_API_KEY, time_from, time_to, sort)
     async with aiohttp.ClientSession() as session:
         return await fetcher.fetch_news(ticker, session=session)
+
+
+def get_stock_news_sentiment(ticker: str, time_from: str, time_to: str, sort: str = "RELEVANCE") -> dict:
+    """
+    Synchronously fetch news for a single stock ticker.
+    Internally calls the async `fetch_single_news` function.
+    """
+    full_result = asyncio.run(fetch_single_news(ticker, time_from, time_to, sort))
+    simplified = {}
+    for ticker, articles in full_result.items():
+        simplified[ticker] = []
+        for article in articles:
+            simplified_article = {
+                "title": article.get("title"),
+                # "url": article.get("url"),
+                # "time_published": article.get("time_published"),
+                "summary": article.get("summary"),
+                "source": article.get("source"),
+                "overall_sentiment": article.get("overall_sentiment_label") + " score-" + str(article.get("overall_sentiment_score"))
+                # "ticker_sentiment": article.get("ticker_sentiment")  # 可选：可以注释掉这一行
+            }
+            simplified[ticker].append(simplified_article)
+    return simplified
+
+
+a = get_stock_news_sentiment('TSLA','20240101T0130','20250401T0130','RELEVANCE')
+print(a)

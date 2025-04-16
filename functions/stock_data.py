@@ -1,3 +1,7 @@
+import asyncio
+from data_collection.alvan_dc.news_fetcher import fetch_single_news
+from config.api_config import MAX_articles
+
 # === Tool 1: Company Info ===
 def data_collect_company_info(stock_name: str) -> str:
     """
@@ -67,4 +71,64 @@ def get_moving_average(stock_name: str, window: int = 3) -> float:
 get_moving_average._tool_config = {
     "name": "get_moving_average",
     "description": "Returns the moving average of the stock price for a given window."
+}
+
+
+
+def get_stock_news_sentiment(ticker: str, time_from: str, time_to: str, sort: str = "RELEVANCE") -> dict:
+    """
+    Synchronously fetch news for a single stock ticker.
+    Internally calls the async `fetch_single_news` function.
+    """
+    full_result = asyncio.run(fetch_single_news(ticker, time_from, time_to, sort))
+    simplified = {}
+    
+    for ticker, articles in full_result.items():
+        simplified[ticker] = []
+        cnt = 0
+        for article in articles:
+            cnt += 1
+            simplified_article = {
+                "title": article.get("title"),
+                # "url": article.get("url"),
+                # "time_published": article.get("time_published"),
+                "summary": article.get("summary"),
+                "source": article.get("source"),
+                "overall_sentiment": article.get("overall_sentiment_label") + " score-" + str(article.get("overall_sentiment_score"))
+                # "ticker_sentiment": article.get("ticker_sentiment")
+            }
+            simplified[ticker].append(simplified_article)
+            if cnt >= MAX_articles:
+                break
+    return simplified
+
+get_stock_news_sentiment._tool_config = {
+    "name": "fetch_single_news",
+    "description": (
+        "Fetches news articles for a single stock ticker within a specified date range. "
+        "Requires the following parameters: "
+        "`ticker` is the stock ticker symbol (e.g., 'AAPL'); "
+        "`time_from` is the start time in ISO format (e.g., '20240101T0130'); "
+        "`time_to` is the end time in ISO format (e.g., '20250401T0130'); "
+        "`sort` determines the sorting order for results (e.g., 'RELEVANCE' or 'LATEST'; default is 'RELEVANCE')."
+    ),
+    "parameters": {
+        "ticker": {
+            "type": "string",
+            "description": "The stock ticker symbol, e.g., 'AAPL'."
+        },
+        "time_from": {
+            "type": "string",
+            "description": "Start time in ISO format, e.g., '20240101T0130'."
+        },
+        "time_to": {
+            "type": "string",
+            "description": "End time in ISO format, e.g., '20250401T0130'."
+        },
+        "sort": {
+            "type": "string",
+            "description": "Sorting order for results, such as 'RELEVANCE' or 'LATEST'.",
+            "default": "RELEVANCE"
+        }
+    }
 }
