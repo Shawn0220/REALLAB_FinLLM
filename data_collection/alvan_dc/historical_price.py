@@ -1,8 +1,12 @@
 import asyncio
 import aiohttp
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parents[2]))
+from config.api_config import api_keys
 
 class AlphaVantageHistPriceFetcher:
-    def __init__(self, api_key:str, outputsize:str="compact", datatype:str="json", max_concurrent_requests:int=25):
+    def __init__(self, api_key:str=api_keys["alphavantage"], outputsize:str="compact", datatype:str="json", max_concurrent_requests:int=25):
         """
         Initialize the daily price fetcher.
         
@@ -50,13 +54,14 @@ class AlphaVantageHistPriceFetcher:
                     if response.status == 200:
                         if self.datatype == "json":
                             data = await response.json()
+                            return {ticker: data.get("Time Series (Daily)")}
                         else:
                             data = await response.text()
-                        return {ticker: data.get("Time Series (Daily)")}
+                            return {ticker: data}
                     return {ticker: None}
 
 
-async def fetch_single_adjdaily(ticker:str, api_key:str, outputsize:str="compact", datatype:str="json"):
+async def fetch_single_adjdaily(ticker:str, outputsize:str="compact", datatype:str="json"):
     """
     Fetch news for a single ticker symbol.
 
@@ -69,6 +74,6 @@ async def fetch_single_adjdaily(ticker:str, api_key:str, outputsize:str="compact
     Returns:
         dict: Ticker -> daily adjusted price
     """
-    fetcher = AlphaVantageHistPriceFetcher(api_key, outputsize, datatype)
+    fetcher = AlphaVantageHistPriceFetcher(api_keys["alphavantage"], outputsize, datatype)
     async with aiohttp.ClientSession() as session:
         return await fetcher.fetch_adjdaily(ticker, session=session)
