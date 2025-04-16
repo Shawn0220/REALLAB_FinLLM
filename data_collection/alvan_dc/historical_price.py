@@ -67,7 +67,7 @@ async def fetch_single_adjdaily(ticker:str, api_key:str, outputsize:str="compact
         datatype (str): 'json' or 'csv'.
 
     Returns:
-        dict: Ticker -> News feed list
+        dict: Ticker -> daily adjusted price
     """
     fetcher = AlphaVantageHistPriceFetcher(api_key, outputsize, datatype)
     async with aiohttp.ClientSession() as session:
