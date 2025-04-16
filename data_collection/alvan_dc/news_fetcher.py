@@ -2,14 +2,17 @@ import asyncio
 import aiohttp
 
 class AlphaVantageNewsFetcher:
-    def __init__(self, api_key, time_from, time_to, sort="RELEVANCE", max_concurrent_requests=25):
+    def __init__(self, api_key:str, time_from:str, time_to:str, sort:str="RELEVANCE", max_concurrent_requests=25):
         """
         Initialize the news fetcher.
         
         Args:
             api_key (str): Your Alpha Vantage API key.
+            sort (str): default 'RELEVANCE', 'LATEST','EARLIEST'.
+            time_from (str): In YYYYMMDDTHHMM format.
+            time_to (str): In YYYYMMDDTHHMM format.
             max_concurrent_requests (int): Maximum number of concurrent API requests.
-
+            
         """
         self.api_key = api_key
         self.time_from = time_from
@@ -46,7 +49,7 @@ class AlphaVantageNewsFetcher:
                     return {ticker: None}
 
 
-async def fetch_all_news(tickers, api_key, time_from, time_to, sort="RELEVANCE", max_concurrent_requests=25):
+async def fetch_all_news(tickers:list, api_key:str, time_from:str, time_to:str, sort:str="RELEVANCE", max_concurrent_requests:int=25):
     """
     Fetch news for a list of company of ticker using AlphaVantageNewsFetcher.
 
@@ -74,7 +77,7 @@ async def fetch_all_news(tickers, api_key, time_from, time_to, sort="RELEVANCE",
     return results
 
 
-async def fetch_single_news(ticker, api_key, time_from, time_to, sort="RELEVANCE"):
+async def fetch_single_news(ticker:str, api_key:str, time_from:str, time_to:str, sort="RELEVANCE"):
     """
     Fetch news for a single ticker symbol.
 
