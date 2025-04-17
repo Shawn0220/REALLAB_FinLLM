@@ -59,7 +59,6 @@ class AlphaVantageHistPriceFetcher:
 
 
 async def fetch_single_adjdaily(ticker:str, outputsize:str="compact", datatype:str="json"):
-async def fetch_single_adjdaily(ticker:str, outputsize:str="compact", datatype:str="json"):
     """
     Fetch news for a single ticker symbol.
 
