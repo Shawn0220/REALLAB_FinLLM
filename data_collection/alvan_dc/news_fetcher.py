@@ -88,7 +88,7 @@ async def fetch_single_news(ticker, time_from, time_to, sort="RELEVANCE"):
     Returns:
         dict: Ticker -> News feed list
     """
-    # print(api_keys["alphavantage"])
+    print(api_keys["alphavantage"])
     fetcher = AlphaVantageNewsFetcher(api_keys["alphavantage"], time_from, time_to, sort)
     async with aiohttp.ClientSession() as session:
         return await fetcher.fetch_news(ticker, session=session)
