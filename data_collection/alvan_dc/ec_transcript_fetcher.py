@@ -1,0 +1,69 @@
+import asyncio
+import aiohttp
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parents[2]))
+from config.api_config import api_keys
+
+class AlphaVantageEarningCallFetcher:
+    def __init__(self, api_key:str=api_keys["alphavantage"], max_concurrent_requests:int=25):
+        """
+        Initialize the daily price fetcher.
+        
+        Args:
+            api_key (str): Your Alpha Vantage API key.
+            outputsize (str): 'compact' for latest 100 points, 'full' for full history.
+            datatype (str): 'json' or 'csv'.
+            max_concurrent_requests (int): Max concurrent API calls allowed.
+
+        """
+
+        self.api_key = api_key
+        self.semaphore = asyncio.Semaphore(max_concurrent_requests)
+
+    async def fetch_ec_transcript(self, ticker:str, quarter:str, session:aiohttp.ClientSession = None) -> dict: 
+        """
+        Fetch earning call transcript for a single ticker.
+
+        Args:
+            ticker (str): Ticker symbol.
+            quarter (str): Fiscal quarter in YYYYQM format.
+            session: Existing aiohttp session.
+        
+        Returns:
+            dict: A dictionary mapping the ticker to its corresponding fundamental data.
+        """
+        url = f'https://www.alphavantage.co/query?function=EARNINGS_CALL_TRANSCRIPT&symbol={ticker}&quarter={quarter}&apikey={self.api_key}'
+        
+        if session is None:
+            async with aiohttp.ClientSession() as new_session:
+                async with self.semaphore:
+                    async with new_session.get(url) as response:
+                        if response.status == 200:
+                            data = await response.json()
+                            return data
+                        return {ticker: None}
+        else:
+            async with self.semaphore:
+                async with session.get(url) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        return data
+                    return {ticker: None}
+                
+async def fetch_single_ec_transcript(ticker:str, quarter:str) -> dict:
+    """
+    Fetch fundamental data for a single ticker.
+
+    Args:
+        ticker (str): Ticker symbol.
+        quarter (str): Fiscal quarter in YYYYQM format.
+    
+    Returns:
+        dict: A dictionary mapping the ticker to its corresponding earning call transcript.
+    """
+    fetcher = AlphaVantageEarningCallFetcher()
+    async with aiohttp.ClientSession() as session:
+        return await fetcher.fetch_ec_transcript(ticker, quarter=quarter, session=session)
+
+
