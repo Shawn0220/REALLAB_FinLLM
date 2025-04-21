@@ -1,9 +1,12 @@
 import asyncio
 import aiohttp
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parents[2]))
 from config.api_config import api_keys
 
 class AlphaVantageNewsFetcher:
-    def __init__(self, api_key, time_from, time_to, sort="RELEVANCE", max_concurrent_requests=25):
+    def __init__(self, api_key: str, time_from: str, time_to: str, sort: str = "RELEVANCE", max_concurrent_requests: int = 25):
         """
         Initialize the news fetcher.
         
@@ -18,7 +21,7 @@ class AlphaVantageNewsFetcher:
         self.sort = sort
         self.semaphore = asyncio.Semaphore(max_concurrent_requests)
 
-    async def fetch_news(self, ticker, session=None):
+    async def fetch_news(self, ticker: str, session=None):
         """
         Fetch news sentiment for a single ticker.
 
@@ -47,15 +50,15 @@ class AlphaVantageNewsFetcher:
                     return {ticker: None}
 
 
-async def fetch_all_news(tickers, api_key, time_from, time_to, sort="RELEVANCE", max_concurrent_requests=25):
+async def fetch_all_news(tickers, api_key: str, time_from: str, time_to: str, sort: str="RELEVANCE", max_concurrent_requests: int=25) -> dict:
     """
     Fetch news for a list of company of ticker using AlphaVantageNewsFetcher.
 
     Args:
         tickers (list): List of ticker symbols.
         api_key (str): Alpha Vantage API key.
-        time_from (str): Start time.
-        time_to (str): End time.
+        time_from (str): Start time. In YYYYMMDDTHHMM format, eg.20220410T0130
+        time_to (str): End time. In YYYYMMDDTHHMM format, eg.20220410T0130
         sort (str): Sort order(Latest, Earliest) 
         max_concurrent_requests (int): Max concurrent requests.
 
@@ -75,20 +78,19 @@ async def fetch_all_news(tickers, api_key, time_from, time_to, sort="RELEVANCE",
     return results
 
 
-async def fetch_single_news(ticker, time_from, time_to, sort="RELEVANCE"):
+async def fetch_single_news(ticker, time_from: str, time_to: str, sort: str = "RELEVANCE") -> dict:
     """
     Fetch news for a single ticker symbol.
 
     Args:
         ticker (str): Stock ticker.
-        time_from (str): Start time.
-        time_to (str): End time.
+        time_from (str): Start time.In YYYYMMDDTHHMM format, eg.20220410T0130
+        time_to (str): End time.In YYYYMMDDTHHMM format, eg.20220410T0130
         sort (str): Sorting order.
 
     Returns:
         dict: Ticker -> News feed list
     """
-    print(api_keys["alphavantage"])
     fetcher = AlphaVantageNewsFetcher(api_keys["alphavantage"], time_from, time_to, sort)
     async with aiohttp.ClientSession() as session:
         return await fetcher.fetch_news(ticker, session=session)

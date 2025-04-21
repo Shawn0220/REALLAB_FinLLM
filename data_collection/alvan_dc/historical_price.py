@@ -1,9 +1,12 @@
 import asyncio
 import aiohttp
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parents[2]))
 from config.api_config import api_keys
 
 class AlphaVantageHistPriceFetcher:
-    def __init__(self, api_key:str=api_keys["alphavantage"], outputsize:str="compact", datatype:str="json", max_concurrent_requests:int=25):
+    def __init__(self, api_key: str = api_keys["alphavantage"], outputsize: str = "compact", datatype: str = "json", max_concurrent_requests: int = 25):
         """
         Initialize the daily price fetcher.
         
@@ -20,7 +23,7 @@ class AlphaVantageHistPriceFetcher:
         self.semaphore = asyncio.Semaphore(max_concurrent_requests)
 
 
-    async def fetch_adjdaily(self, ticker: str, session: aiohttp.ClientSession = None):
+    async def fetch_adjdaily(self, ticker: str, session: aiohttp.ClientSession = None) -> dict:
         """
         Fetch adjusted daily stock price data for a single ticker.
 
@@ -58,7 +61,7 @@ class AlphaVantageHistPriceFetcher:
                     return {ticker: None}
 
 
-async def fetch_single_adjdaily(ticker:str, outputsize:str="compact", datatype:str="json"):
+async def fetch_single_adjdaily(ticker: str, outputsize: str = "compact", datatype: str = "json") -> dict:
     """
     Fetch news for a single ticker symbol.
 
@@ -75,18 +78,3 @@ async def fetch_single_adjdaily(ticker:str, outputsize:str="compact", datatype:s
     async with aiohttp.ClientSession() as session:
         return await fetcher.fetch_adjdaily(ticker, session=session)
     
-
-async def fetch_ticker_symbol(ticker:str, outputsize:str="compact"):
-    """
-    Fetch news for a single ticker symbol.
-
-    Args:
-        ticker (str): Stock ticker.
-        outputsize (str): 'compact' for latest 100 points, 'full' for full history.
-
-    Returns:
-        dict: Ticker -> News feed list
-    """
-    fetcher = AlphaVantageHistPriceFetcher(api_keys["alphavantage"], outputsize, "json")
-    async with aiohttp.ClientSession() as session:
-        return await fetcher.fetch_adjdaily(ticker, session=session)
