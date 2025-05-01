@@ -1,6 +1,8 @@
 import asyncio
 from data_collection.alvan_dc.news_fetcher import fetch_single_news
 from data_collection.alvan_dc.historical_price import fetch_ticker_symbol
+from data_collection.alvan_dc.fundamental_fetcher import fetch_single_fundamental
+from data_collection.alvan_dc.ec_transcript_fetcher import fetch_single_ec_transcript
 from config.api_config import MAX_articles
 
 
@@ -168,6 +170,79 @@ get_stock_price_history._tool_config = {
             "type": "string",
             "description": "Amount of historical data to retrieve: 'compact' (latest 100 points) or 'full' (entire history).",
             "default": "compact"
+        }
+    }
+}
+
+def get_stock_fundamental_data(ticker: str, function: str = "OVERVIEW") -> dict:
+    """
+    Synchronously fetch fundamental data (e.g., OVERVIEW, INCOME_STATEMENT) for a single stock ticker.
+    Internally calls the async `fetch_single_fundamental` function.
+
+    Args:
+        ticker (str): The stock ticker symbol, e.g., 'AAPL'.
+        function (str): Type of fundamental data to retrieve. Options include:
+                        'OVERVIEW', 'INCOME_STATEMENT', 'BALANCE_SHEET', 
+                        'CASH_FLOW', 'EARNINGS', or 'DIVIDENDS'.
+
+    Returns:
+        dict: A dictionary containing the fundamental data for the given ticker.
+    """
+    return asyncio.run(fetch_single_fundamental(ticker, function))
+
+get_stock_fundamental_data._tool_config = {
+    "name": "fetch_stock_fundamental_data",
+    "description": (
+        "Fetches fundamental data for a single stock ticker. "
+        "Function types include: 'OVERVIEW', 'INCOME_STATEMENT', 'BALANCE_SHEET', "
+        "'CASH_FLOW', 'EARNINGS', or 'DIVIDENDS'."
+    ),
+    "parameters": {
+        "ticker": {
+            "type": "string",
+            "description": "The stock ticker symbol, e.g., 'AAPL'."
+        },
+        "function": {
+            "type": "string",
+            "description": (
+                "Type of fundamental data to retrieve: "
+                "'OVERVIEW', 'INCOME_STATEMENT', 'BALANCE_SHEET', "
+                "'CASH_FLOW', 'EARNINGS', or 'DIVIDENDS'."
+            ),
+            "default": "OVERVIEW"
+        }
+    }
+}
+
+
+def get_earning_call_transcript(ticker: str, quarter: str) -> dict:
+    """
+    Synchronously fetch earnings call transcript for a single stock ticker and fiscal quarter.
+    Internally calls the async `fetch_single_ec_transcript` function.
+
+    Args:
+        ticker (str): The stock ticker symbol, e.g., 'AAPL'.
+        quarter (str): Fiscal quarter in the format 'YYYYQM', e.g., '2023Q4'.
+
+    Returns:
+        dict: A dictionary containing the earnings call transcript for the specified ticker and quarter.
+    """
+    return asyncio.run(fetch_single_ec_transcript(ticker, quarter))
+
+get_earning_call_transcript._tool_config = {
+    "name": "fetch_earning_call_transcript",
+    "description": (
+        "Fetches the earnings call transcript for a specific fiscal quarter. "
+        "Requires a stock ticker and a fiscal quarter in 'YYYYQM' format, e.g., '2023Q4'."
+    ),
+    "parameters": {
+        "ticker": {
+            "type": "string",
+            "description": "The stock ticker symbol, e.g., 'AAPL'."
+        },
+        "quarter": {
+            "type": "string",
+            "description": "Fiscal quarter in format 'YYYYQM', e.g., '2023Q4'."
         }
     }
 }
