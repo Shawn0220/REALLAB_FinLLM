@@ -157,8 +157,8 @@ get_stock_price_history._tool_config = {
     "description": (
         "Fetches historical adjusted daily stock price data for a single stock ticker. "
         "Requires the following parameters: "
-        "`ticker` is the stock ticker symbol (e.g., 'AAPL'); "
-        "`outputsize` determines how much historical data to return; "
+        "`ticker` is the stock ticker symbol (e.g., 'AAPL'), type string; "
+        "`outputsize` determines how much historical data to return, type string, "
         "use 'compact' to get the latest 100 data points or 'full' to get the complete history."
     ),
     "parameters": {
@@ -194,8 +194,11 @@ get_stock_fundamental_data._tool_config = {
     "name": "fetch_stock_fundamental_data",
     "description": (
         "Fetches fundamental data for a single stock ticker. "
-        "Function types include: 'OVERVIEW', 'INCOME_STATEMENT', 'BALANCE_SHEET', "
-        "'CASH_FLOW', 'EARNINGS', or 'DIVIDENDS'."
+        "Parameters:\n"
+        "- ticker (string): The stock ticker symbol, e.g., 'AAPL'.\n"
+        "- function (string, default='OVERVIEW'): Type of fundamental data to retrieve. "
+        "Options include 'OVERVIEW', 'INCOME_STATEMENT', 'BALANCE_SHEET', 'CASH_FLOW', "
+        "'EARNINGS', or 'DIVIDENDS'."
     ),
     "parameters": {
         "ticker": {
@@ -233,7 +236,9 @@ get_earning_call_transcript._tool_config = {
     "name": "fetch_earning_call_transcript",
     "description": (
         "Fetches the earnings call transcript for a specific fiscal quarter. "
-        "Requires a stock ticker and a fiscal quarter in 'YYYYQM' format, e.g., '2023Q4'."
+        "Parameters:\n"
+        "- ticker (string): The stock ticker symbol, e.g., 'AAPL'.\n"
+        "- quarter (string): Fiscal quarter in format 'YYYYQM', e.g., '2023Q4'."
     ),
     "parameters": {
         "ticker": {
