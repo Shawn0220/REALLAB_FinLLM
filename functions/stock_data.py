@@ -1,10 +1,10 @@
 import asyncio
 from data_collection.alvan_dc.news_fetcher import fetch_single_news
-from data_collection.alvan_dc.historical_price import fetch_ticker_symbol
+from data_collection.alvan_dc.historical_price import fetch_single_adjdaily
 from data_collection.alvan_dc.fundamental_fetcher import fetch_single_fundamental
 from data_collection.alvan_dc.ec_transcript_fetcher import fetch_single_ec_transcript
 from config.api_config import MAX_articles
-
+from datetime import datetime
 
 # === Tool 1: Company Info ===
 def data_collect_company_info(stock_name: str) -> str:
@@ -138,19 +138,43 @@ get_stock_news_sentiment._tool_config = {
 }
 
 
-def get_stock_price_history(ticker: str, outputsize: str = "compact") -> dict:
+def get_stock_price_history(ticker: str, today_date: str, outputsize: str = "full") -> dict:
     """
-    Synchronously fetch historical adjusted daily stock price data for a single stock ticker.
-    Internally calls the async `fetch_ticker_symbol` function.
+    Fetch historical adjusted daily stock price data for a stock ticker,
+    filtering out future data beyond `today_date` to prevent data leakage.
 
     Args:
-        ticker (str): The stock ticker symbol, e.g., 'AAPL'.
-        outputsize (str): 'compact' for latest 100 points, 'full' for full history. Considering context window, better not to use 'full'
+        ticker (str): Stock ticker symbol, e.g., 'TSLA'.
+        outputsize (str): 'compact' or 'full'.
+        today_date (str): Upper bound (inclusive) for returned dates, e.g., '2024-01-25'.
 
     Returns:
-        dict: A dictionary containing the historical stock price data.
+        dict: Filtered historical data, e.g., {'TSLA': {date: price_data, ...}}
     """
-    return asyncio.run(fetch_ticker_symbol(ticker, outputsize))
+
+    max_days = 40
+    raw_data = asyncio.run(fetch_single_adjdaily(ticker, outputsize))
+    cutoff = datetime.strptime(today_date, "%Y-%m-%d")
+
+    # DEBUG: 看看有哪些数据日期
+    all_dates = list(raw_data[ticker].keys())
+    print(f"Data available from {min(all_dates)} to {max(all_dates)}")
+
+    filtered_dates = [
+        date for date in all_dates
+        if datetime.strptime(date, "%Y-%m-%d") <= cutoff
+    ][1:max_days]
+
+    filtered = {
+        ticker: {
+            date: {
+                'adjusted close': raw_data[ticker][date]['5. adjusted close'],
+                'volume': raw_data[ticker][date]['6. volume']
+            }
+            for date in filtered_dates
+        }
+    }
+    return filtered
 
 get_stock_price_history._tool_config = {
     "name": "fetch_stock_price_history",
@@ -158,19 +182,20 @@ get_stock_price_history._tool_config = {
         "Fetches historical adjusted daily stock price data for a single stock ticker. "
         "Requires the following parameters: "
         "`ticker` is the stock ticker symbol (e.g., 'AAPL'), type string; "
-        "`outputsize` determines how much historical data to return, type string, "
+        # "`outputsize` determines how much historical data to return, type string, "
         "use 'compact' to get the latest 100 data points or 'full' to get the complete history."
+        "`today_date` is the cutoff date to prevent future data leakage (e.g., '2021-02-03'), type string in 'YYYY-MM-DD' format; only data on or before this date will be returned."
     ),
     "parameters": {
         "ticker": {
             "type": "string",
             "description": "The stock ticker symbol, e.g., 'AAPL'."
         },
-        "outputsize": {
-            "type": "string",
-            "description": "Amount of historical data to retrieve: 'compact' (latest 100 points) or 'full' (entire history).",
-            "default": "compact"
-        }
+        # "outputsize": {
+        #     "type": "string",
+        #     "description": "Amount of historical data to retrieve: 'compact' (latest 100 points) or 'full' (entire history).",
+        #     "default": "compact"
+        # }
     }
 }
 

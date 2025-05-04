@@ -59,4 +59,4 @@ agents = {
 
 # === Run Recommendation Pipeline ===
 if __name__ == "__main__":
-    run_stock_recommendation("Tesla", agents, user_proxy, debate_mgr, risk_profile="Neutral")
+    run_stock_recommendation("Tesla", agents, user_proxy, debate_mgr, risk_profile="Neutral", today_date="2024-01-25")
