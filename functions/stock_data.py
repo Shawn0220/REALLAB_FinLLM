@@ -154,27 +154,36 @@ def get_stock_price_history(ticker: str, today_date: str, outputsize: str = "ful
 
     max_days = 40
     raw_data = asyncio.run(fetch_single_adjdaily(ticker, outputsize))
-    cutoff = datetime.strptime(today_date, "%Y-%m-%d")
-
-    # DEBUG: 看看有哪些数据日期
     all_dates = list(raw_data[ticker].keys())
-    print(f"Data available from {min(all_dates)} to {max(all_dates)}")
+    all_dates_sorted = sorted(all_dates, reverse=True)  # most recent first
 
-    filtered_dates = [
-        date for date in all_dates
-        if datetime.strptime(date, "%Y-%m-%d") <= cutoff
-    ][1:max_days]
+    cutoff_dt = datetime.strptime(today_date, "%Y-%m-%d")
+    
+    historical = {}
+    today_open = None
+    count = 0
 
-    filtered = {
-        ticker: {
-            date: {
-                'adjusted close': raw_data[ticker][date]['5. adjusted close'],
-                'volume': raw_data[ticker][date]['6. volume']
+    for date_str in all_dates_sorted:
+        date_dt = datetime.strptime(date_str, "%Y-%m-%d")
+        if date_dt < cutoff_dt:
+            # T 日之前的历史数据，作为上下文
+            historical[date_str] = {
+                'close': raw_data[ticker][date_str]['4. close'],
+                'volume': raw_data[ticker][date_str]['6. volume']
             }
-            for date in filtered_dates
+            count += 1
+            if count >= max_days:
+                break
+        elif date_dt == cutoff_dt:
+            # T 日的开盘价
+            today_open = raw_data[ticker][date_str]['1. open']
+
+    return {
+        ticker: {
+            'historical': dict(sorted(historical.items())),  # 按时间正序
+            'today_open': today_open
         }
     }
-    return filtered
 
 get_stock_price_history._tool_config = {
     "name": "fetch_stock_price_history",

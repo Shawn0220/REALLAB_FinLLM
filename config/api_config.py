@@ -15,6 +15,7 @@ api_keys = {
 
 
 llm_config = {
+    "temperature": 0.5,
     "config_list": [
         {
             "model": "gpt-4o",

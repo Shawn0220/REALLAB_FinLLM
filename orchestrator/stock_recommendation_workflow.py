@@ -1,7 +1,7 @@
 from utils.message_utils import get_last_reply_from
 from functions.stock_data import data_collect
 import re
-from utils.utils import extract_trade_decisions
+from utils.fin_utils import extract_trade_decisions
 
 def run_stock_recommendation(
     stock_name: str,
@@ -76,11 +76,13 @@ def run_stock_recommendation(
         "Should we execute the trade?"
     )
     manager_prompt = re.sub(r"(?i)terminate", "", manager_prompt)
-    
+
     agents["completeness_checker"].initiate_chat(agents["manager_agent"], message=manager_prompt)
     manager_agent_decision = get_last_reply_from(agents["manager_agent"])
 
     # print(trader_decision, '\n', risk_decision, '\n', manager_agent_decision, '\n')
     decision_text = trader_decision + risk_decision + manager_agent_decision
     decisions = extract_trade_decisions(decision_text)
+    decisions["date"] = today_date
     print(decisions)
+    return decisions
