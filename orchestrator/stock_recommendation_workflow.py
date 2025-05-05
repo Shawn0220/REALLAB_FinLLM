@@ -69,20 +69,67 @@ def run_stock_recommendation(
 
     print("\n=== Step 5: Manager makes final decision ===")
     manager_prompt = (
-        f"{pass_data_to_analyze_prompt}\n\n"
-        f"{debate_summary}\n"
         f"Trader's Decision:\n{trader_decision}\n\n"
         f"Risk Management Team's Decision:\n{risk_decision}\n\n"
         "Should we execute the trade?"
     )
     manager_prompt = re.sub(r"(?i)terminate", "", manager_prompt)
 
-    agents["completeness_checker"].initiate_chat(agents["manager_agent"], message=manager_prompt)
-    manager_agent_decision = get_last_reply_from(agents["manager_agent"])
 
+
+    hints = [
+        "",  # 第一次不加任何提示
+        "\n[Reminder: Respond with EXECUTE_TRADE or DO_NOT_EXECUTE and provide reasons.]",
+        "\n[Your reply must begin with EXECUTE_TRADE or DO_NOT_EXECUTE.]",
+        "\n[Please clearly state EXECUTE_TRADE or DO_NOT_EXECUTE at the beginning of your response.]",
+        "\n[Format reminder: Response should contain EXECUTE_TRADE or DO_NOT_EXECUTE plus justification.]"
+    ]
+
+    max_retries = 5
+    manager_agent_decision = None
+    manager_fail = False
+    fail_content = None
+
+    for attempt in range(max_retries):
+        try:
+            hint = hints[attempt] if attempt < len(hints) else hints[-1]
+
+            current_prompt = (
+                f"Trader's Decision:\n{trader_decision}\n\n"
+                f"Risk Management Team's Decision:\n{risk_decision}\n\n"
+                "Should we execute the trade?" + hint
+            )
+
+            current_prompt = re.sub(r"(?i)terminate", "", current_prompt)
+
+            agents["completeness_checker"].initiate_chat(agents["manager_agent"], message=current_prompt)
+            manager_agent_decision = get_last_reply_from(agents["manager_agent"])
+
+            if manager_agent_decision:
+                break  # 成功就退出循环
+
+        except Exception as e:
+            print(f"[Retry {attempt + 1}/{max_retries}] Manager agent failed: {e}")
+            
+            # time.sleep(1)
+
+    if manager_agent_decision is None:
+        print("[Warning] Manager agent failed after retries. Using fallback.")
+        manager_agent_decision = "DO_NOT_EXECUTE\nReason: Unable to determine due to repeated failures."
+        manager_fail = True
+        fail_content = trader_decision + risk_decision
+
+
+
+
+
+    # agents["completeness_checker"].initiate_chat(agents["manager_agent"], message=manager_prompt)
+    # manager_agent_decision = get_last_reply_from(agents["manager_agent"])
+    # manager_agent_decision = "EXECUTE_TRADE"
+         
     # print(trader_decision, '\n', risk_decision, '\n', manager_agent_decision, '\n')
     decision_text = trader_decision + risk_decision + manager_agent_decision
     decisions = extract_trade_decisions(decision_text)
     decisions["date"] = today_date
     print(decisions)
-    return decisions
+    return decisions, manager_fail, fail_content

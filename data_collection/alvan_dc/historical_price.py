@@ -42,22 +42,57 @@ class AlphaVantageHistPriceFetcher:
                 async with self.semaphore:
                     async with new_session.get(url) as response:
                         if response.status == 200:
+
+
                             if self.datatype == "json":
-                                data = await response.json()
-                            else:
-                                data = await response.text()
-                            return {ticker: data.get("Time Series (Daily)")}
+                                json_data = await response.json()
+                                print(json_data)
+                                if "Time Series (Daily)" in json_data:
+                                    return {ticker: json_data["Time Series (Daily)"]}
+                                elif "Note" in json_data:
+                                    print(f"[Rate Limit] API call limit hit: {json_data['Note']}")
+                                elif "Error Message" in json_data:
+                                    print(f"[Error] API Error: {json_data['Error Message']}")
+                                else:
+                                    print(f"[Error] Unexpected response: {json_data}")
+                                return {ticker: None}
+
+
+
+
+                            # if self.datatype == "json":
+                            #     data = await response.json()
+                            # else:
+                            #     data = await response.text()
+                            # return {ticker: data.get("Time Series (Daily)")}
                         return {ticker: None}
         else:
             async with self.semaphore:
                 async with session.get(url) as response:
                     if response.status == 200:
+
+
                         if self.datatype == "json":
-                            data = await response.json()
-                            return {ticker: data.get("Time Series (Daily)")}
-                        else:
-                            data = await response.text()
-                            return {ticker: data}
+                            json_data = await response.json()
+                            print(json_data)
+                            if "Time Series (Daily)" in json_data:
+                                return {ticker: json_data["Time Series (Daily)"]}
+                            elif "Note" in json_data:
+                                print(f"[Rate Limit] API call limit hit: {json_data['Note']}")
+                            elif "Error Message" in json_data:
+                                print(f"[Error] API Error: {json_data['Error Message']}")
+                            else:
+                                print(f"[Error] Unexpected response: {json_data}")
+                            return {ticker: None}
+
+
+
+                        # if self.datatype == "json":
+                        #     data = await response.json()
+                        #     return {ticker: data.get("Time Series (Daily)")}
+                        # else:
+                        #     data = await response.text()
+                        #     return {ticker: data}
                     return {ticker: None}
 
 

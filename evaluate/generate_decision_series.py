@@ -88,18 +88,25 @@ DATES = ['2024-01-02', '2024-01-03', '2024-01-04', '2024-01-05',
                '2024-03-22', '2024-03-25', '2024-03-26', '2024-03-27',
                '2024-03-28']
 
-DATES = ['2024-01-04', '2024-01-05']
+# DATES = ['2024-01-04', '2024-01-05']
 
 # === Run ===
 
 agents_outputs = []
+manager_fail_times = 0
+fail_contents = []
+
 for date in DATES:
-    agents_output = run_stock_recommendation(
+    agents_output, manager_fail, fail_content = run_stock_recommendation(
         stock_name, agents, user_proxy, debate_mgr, 
         risk_profile="Neutral", today_date=date
     )
     print("agents_output: ", agents_output)
     agents_outputs.append(agents_output)
+    
+    if manager_fail:
+        manager_fail_times += 1
+        fail_contents.append(fail_content)
 
 
 position_list = get_position_list(agents_outputs)
@@ -109,4 +116,6 @@ out_dir = "results"
 os.makedirs(out_dir, exist_ok=True)
 out_path = os.path.join(out_dir, f"{stock_name}.txt")
 with open(out_path, "w") as f:
-    f.write(" ".join(position_list) + "\n")
+    f.write(",".join(map(str, position_list)) + "\n")
+
+print("manager_fail_times", manager_fail_times)

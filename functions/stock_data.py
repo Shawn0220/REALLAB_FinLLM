@@ -138,7 +138,7 @@ get_stock_news_sentiment._tool_config = {
 }
 
 
-def get_stock_price_history(ticker: str, today_date: str, outputsize: str = "full") -> dict:
+def get_stock_price_history(ticker: str, today_date: str) -> dict:
     """
     Fetch historical adjusted daily stock price data for a stock ticker,
     filtering out future data beyond `today_date` to prevent data leakage.
@@ -153,7 +153,8 @@ def get_stock_price_history(ticker: str, today_date: str, outputsize: str = "ful
     """
 
     max_days = 40
-    raw_data = asyncio.run(fetch_single_adjdaily(ticker, outputsize))
+    raw_data = asyncio.run(fetch_single_adjdaily(ticker, "full"))
+    # print(raw_data)
     all_dates = list(raw_data[ticker].keys())
     all_dates_sorted = sorted(all_dates, reverse=True)  # most recent first
 
