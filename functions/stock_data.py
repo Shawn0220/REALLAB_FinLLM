@@ -5,6 +5,7 @@ from data_collection.alvan_dc.fundamental_fetcher import fetch_single_fundamenta
 from data_collection.alvan_dc.ec_transcript_fetcher import fetch_single_ec_transcript
 from config.api_config import MAX_articles
 from datetime import datetime
+from functions.local_data_loader import fetch_single_adjdaily_locally, fetch_fundamental_summary
 
 # === Tool 1: Company Info ===
 def data_collect_company_info(stock_name: str) -> str:
@@ -152,8 +153,8 @@ def get_stock_price_history(ticker: str, today_date: str) -> dict:
         dict: Filtered historical data, e.g., {'TSLA': {date: price_data, ...}}
     """
 
-    max_days = 40
-    raw_data = asyncio.run(fetch_single_adjdaily(ticker, "full"))
+    max_days = 20
+    raw_data = fetch_single_adjdaily_locally(ticker)
     # print(raw_data)
     all_dates = list(raw_data[ticker].keys())
     all_dates_sorted = sorted(all_dates, reverse=True)  # most recent first
@@ -209,21 +210,20 @@ get_stock_price_history._tool_config = {
     }
 }
 
-def get_stock_fundamental_data(ticker: str, function: str = "OVERVIEW") -> dict:
+def get_stock_fundamental_data(ticker: str, today: str) -> dict:
     """
     Synchronously fetch fundamental data (e.g., OVERVIEW, INCOME_STATEMENT) for a single stock ticker.
     Internally calls the async `fetch_single_fundamental` function.
 
     Args:
         ticker (str): The stock ticker symbol, e.g., 'AAPL'.
-        function (str): Type of fundamental data to retrieve. Options include:
-                        'OVERVIEW', 'INCOME_STATEMENT', 'BALANCE_SHEET', 
-                        'CASH_FLOW', 'EARNINGS', or 'DIVIDENDS'.
+        today (str): today's date, 'YYYY-MM-DD' e.g., '2023-03-11'.
 
     Returns:
         dict: A dictionary containing the fundamental data for the given ticker.
     """
-    return asyncio.run(fetch_single_fundamental(ticker, function))
+    return fetch_fundamental_summary(ticker, today)
+# asyncio.run(fetch_single_fundamental(ticker, function))
 
 get_stock_fundamental_data._tool_config = {
     "name": "fetch_stock_fundamental_data",
@@ -231,23 +231,18 @@ get_stock_fundamental_data._tool_config = {
         "Fetches fundamental data for a single stock ticker. "
         "Parameters:\n"
         "- ticker (string): The stock ticker symbol, e.g., 'AAPL'.\n"
-        "- function (string, default='OVERVIEW'): Type of fundamental data to retrieve. "
-        "Options include 'OVERVIEW', 'INCOME_STATEMENT', 'BALANCE_SHEET', 'CASH_FLOW', "
-        "'EARNINGS', or 'DIVIDENDS'."
+        "- today (string): today's date, 'YYYY-MM-DD' e.g., '2023-03-11'"
     ),
     "parameters": {
         "ticker": {
             "type": "string",
             "description": "The stock ticker symbol, e.g., 'AAPL'."
         },
-        "function": {
+        "today": {
             "type": "string",
             "description": (
-                "Type of fundamental data to retrieve: "
-                "'OVERVIEW', 'INCOME_STATEMENT', 'BALANCE_SHEET', "
-                "'CASH_FLOW', 'EARNINGS', or 'DIVIDENDS'."
-            ),
-            "default": "OVERVIEW"
+                "today's date, 'YYYY-MM-DD' e.g., '2023-03-11'"
+            )
         }
     }
 }

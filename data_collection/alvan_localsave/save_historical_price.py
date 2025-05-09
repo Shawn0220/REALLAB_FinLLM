@@ -16,7 +16,7 @@ from alvan_dc.historical_price import AlphaVantageHistPriceFetcher
 # Load API key from .env file
 load_dotenv()
 av_api = os.getenv("alphavantage_api_key")
-
+print(av_api)
 # Define paths
 parent_path = Path(__file__).resolve().parents[2]
 data_path = parent_path / "Data"
