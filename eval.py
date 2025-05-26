@@ -1,6 +1,6 @@
 from autogen import UserProxyAgent
 from config.api_config import llm_config
-from orchestrator.stock_recommendation_workflow import run_stock_recommendation
+from utils.fin_utils import run_portfolio_simulation
 from orchestrator.debate_group import create_debate_group
 
 from agents.analyst_agent import get_analyst_agent
@@ -56,8 +56,22 @@ agents = {
     "manager_agent": manager,
     "completeness_checker": completeness_checker
 }
+    
+    
+tickers = ["AMZN"]
+start = "2024-01-01"
+end = "2024-03-29"
+folder = r"D:\shawn_workspace\REAL LAB\REALLAB_FinLLM\Data\market_cap"
 
-# === Run Recommendation Pipeline ===
-if __name__ == "__main__":
-    decisions, manager_fail, fail_content = run_stock_recommendation("Tesla", agents, user_proxy, debate_mgr, risk_profile="Neutral", today_date="2024-01-03")
-    print(decisions, manager_fail, fail_content)
+result = run_portfolio_simulation(
+    tickers=tickers,
+    start=start,
+    end=end,
+    agents=agents,
+    user_proxy=user_proxy,
+    debate_mgr=debate_mgr,
+    risk_profile="Neutral"
+)
+
+print("Cumulative Return (CR):", result["CR"])
+print("Annualized Return (AR):", result["AR"])
