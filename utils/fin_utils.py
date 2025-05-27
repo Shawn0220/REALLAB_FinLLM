@@ -119,13 +119,13 @@ def evaluate_portfolio_performance(
     # 4. Compute CR and AR
     CR = daily_values[-1] / initial_cash - 1
     AR = (1 + CR) ** (252 / n_days) - 1
+    print(position_dict)
     print("daily_values:", daily_values)
     return {
         "daily_values": daily_values,
         "CR": CR,
         "AR": AR
     }
-
 
 def load_local_price_data(
     tickers: List[str],
@@ -138,36 +138,35 @@ def load_local_price_data(
     for ticker in tickers:
         file_path = os.path.join(dir_path, f"{ticker}.csv")
         if not os.path.isfile(file_path):
-            raise FileNotFoundError(f"No file:{file_path}")
+            raise FileNotFoundError(f"No file: {file_path}")
 
         df = pd.read_csv(file_path)
 
+        # 清洗列名
         df.columns = df.columns.str.strip().str.title()
         if "Date" not in df.columns:
-            raise ValueError(f"{file_path} No 'Date' column")
+            raise ValueError(f"{file_path} missing 'Date' column")
 
-        df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
-        df = df.dropna(subset=["Date"]).set_index("Date")
+        # 转换为 datetime（即便带时区也统一），再去掉时区
+        df["Date"] = pd.to_datetime(df["Date"], errors="coerce", utc=True)  # 添加 utc 统一化
+        df = df.dropna(subset=["Date"])
+        df["Date"] = df["Date"].dt.tz_convert(None)  # 去除时区
+        df.set_index("Date", inplace=True)
 
-        if not isinstance(df.index, pd.DatetimeIndex):
-            df.index = pd.to_datetime(df.index, errors="coerce")
-            df = df[~df.index.isna()]
-
-        if isinstance(df.index, pd.DatetimeIndex) and df.index.tz is not None:
-            df.index = df.index.tz_convert(None)
-
+        # 时间过滤
         if start:
             df = df.loc[df.index >= pd.to_datetime(start)]
         if end:
             df = df.loc[df.index <= pd.to_datetime(end)]
 
-
+        # 保留常用列
         keep_cols = ["Open", "High", "Low", "Close", "Volume"]
-        df = df[[c for c in keep_cols if c in df.columns]]
+        df = df[[col for col in keep_cols if col in df.columns]]
 
         price_data_dict[ticker] = df
 
     return price_data_dict
+
 
 
 def extract_trade_decisions(text: str):
@@ -225,20 +224,43 @@ def get_position_list(agent_outputs: list[dict]) -> list[int]:
 
     return position_list
 
+def generate_trading_days(start, end, ticker="AMZN"):
+    """
+    提取某只股票在指定时间区间内的交易日（开市日）列表。
 
-def generate_trading_days(start, end):
+    参数：
+        price_data_dict (dict): 如 {'AAPL': pd.DataFrame,...}，索引为datetime
+        ticker (str): 股票代码，如 "AAPL"
+        start (str): 开始日期，格式为 "YYYY-MM-DD"
+        end (str): 结束日期，格式为 "YYYY-MM-DD"
+
+    返回：
+        List[str]: 交易日组成的日期字符串列表，格式为 "YYYY-MM-DD"
     """
-    Generate a list of trading days (YYYY-MM-DD) between start and end (inclusive).
-    """
-    start_dt = datetime.strptime(start, "%Y-%m-%d")
-    end_dt = datetime.strptime(end, "%Y-%m-%d")
-    date_list = []
-    curr = start_dt
-    while curr <= end_dt:
-        if curr.weekday() < 5:  # Weekdays only
-            date_list.append(curr.strftime("%Y-%m-%d"))
-        curr += timedelta(days=1)
-    return date_list
+    price_data = load_local_price_data(
+    tickers=[ticker],
+    start=start,
+    end=end)
+
+    df = price_data[ticker]
+    df = df.loc[start:end]  # 自动按 index 过滤
+    trading_days = df.index.strftime("%Y-%m-%d").tolist()
+    return trading_days
+
+
+# def generate_trading_days(start, end):
+#     """
+#     Generate a list of trading days (YYYY-MM-DD) between start and end (inclusive).
+#     """
+#     start_dt = datetime.strptime(start, "%Y-%m-%d")
+#     end_dt = datetime.strptime(end, "%Y-%m-%d")
+#     date_list = []
+#     curr = start_dt
+#     while curr <= end_dt:
+#         if curr.weekday() < 5:  # Weekdays only
+#             date_list.append(curr.strftime("%Y-%m-%d"))
+#         curr += timedelta(days=1)
+#     return date_list
 
 
 def run_portfolio_simulation(tickers, start, end, agents, user_proxy, debate_mgr, risk_profile="Neutral"):
@@ -270,4 +292,4 @@ def run_portfolio_simulation(tickers, start, end, agents, user_proxy, debate_mgr
         price_data_dict=price_data_dict
     )
 
-    return result
+    return result, position_dict

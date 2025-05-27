@@ -80,23 +80,23 @@ async def fetch_all_news(tickers, api_key: str, time_from: str, time_to: str, so
     return results
 
 
-def normalize_time_format(iso_str: str) -> str:
-    """
-    Convert ISO format 'YYYY-MM-DDTHH:MM:SS' to 'YYYYMMDDTHHMM'.
-    If already in target format, return as is.
-    """
-    # Match ISO format
-    match = re.match(r"(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):\d{2}", iso_str)
-    if match:
-        yyyy, mm, dd, hh, mi = match.groups()
-        return f"{yyyy}{mm}{dd}T{hh}{mi}"
+# def normalize_time_format(iso_str: str) -> str:
+#     """
+#     Convert ISO format 'YYYY-MM-DDTHH:MM:SS' to 'YYYYMMDDTHHMM'.
+#     If already in target format, return as is.
+#     """
+#     # Match ISO format
+#     match = re.match(r"(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):\d{2}", iso_str)
+#     if match:
+#         yyyy, mm, dd, hh, mi = match.groups()
+#         return f"{yyyy}{mm}{dd}T{hh}{mi}"
     
-    # Try parsing ISO format using datetime (more robust fallback)
-    try:
-        dt = datetime.fromisoformat(iso_str)
-        return dt.strftime("%Y%m%dT%H%M")
-    except ValueError:
-        return iso_str  # Return as-is if already correct or unknown format
+#     # Try parsing ISO format using datetime (more robust fallback)
+#     try:
+#         dt = datetime.fromisoformat(iso_str)
+#         return dt.strftime("%Y%m%dT%H%M")
+#     except ValueError:
+#         return iso_str  # Return as-is if already correct or unknown format
 
 async def fetch_single_news(ticker, time_from: str, time_to: str, sort: str = "RELEVANCE") -> dict:
     """
@@ -111,8 +111,8 @@ async def fetch_single_news(ticker, time_from: str, time_to: str, sort: str = "R
     Returns:
         dict: Ticker -> News feed list
     """
-    time_from = normalize_time_format(time_from)
-    time_to = normalize_time_format(time_to)
+    # time_from = normalize_time_format(time_from)
+    # time_to = normalize_time_format(time_to)
 
     fetcher = AlphaVantageNewsFetcher(api_keys["alphavantage"], time_from, time_to, sort)
     async with aiohttp.ClientSession() as session:

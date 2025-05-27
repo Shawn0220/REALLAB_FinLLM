@@ -2,6 +2,31 @@ from utils.message_utils import get_last_reply_from
 from functions.stock_data import data_collect
 import re
 from utils.fin_utils import extract_trade_decisions
+import logging
+import os
+
+def setup_agent_logger(stock_name: str):
+    log_filename = f"{stock_name}_usage.log"
+    log_path = os.path.join("logs", log_filename)
+
+    os.makedirs("logs", exist_ok=True)
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s | %(levelname)s | %(message)s",
+        handlers=[
+            logging.FileHandler(log_path),
+            logging.StreamHandler()
+        ],
+        force=True  # 强制重设 handler，防止多次调用 basicConfig 无效
+    )
+
+def log_agent_usage(agent_name: str, agent_obj):
+    actual = agent_obj.get_actual_usage()
+    total = agent_obj.get_total_usage()
+    logging.info(f"[{agent_name}] Actual Usage (no cache): {actual}")
+    logging.info(f"[{agent_name}] Total  Usage (with cache): {total}")
+
 
 def run_stock_recommendation(
     stock_name: str,
@@ -21,16 +46,22 @@ def run_stock_recommendation(
         debate_manager: GroupChatManager for bullish/bearish debate.
         risk_profile (str): The user's risk preference (e.g., 'Neutral').
     """
+    setup_agent_logger(stock_name)
+    logging.info(f"[{stock_name}]  Date {today_date}")
+
     print("\n=== Step 1: Analyst collects data ===")
     analyst_prompt = f"Today is {today_date}. Please collect stock data for {stock_name}."
     user_proxy.initiate_chat(agents["analyst_agent"], message=analyst_prompt)
 
-    # 获取 analyst 最后一条消息（即工具调用返回值）
+    log_agent_usage("analyst_agent", agents["analyst_agent"])
+
+
     stock_data_response = get_last_reply_from(agents["analyst_agent"])
     # print("Raw analyst response:", stock_data_response)
 
     pass_data_to_analyze_prompt = "The following stock data is available:\n" + stock_data_response + "You are now in a team discussion. \nBullish researcher: explain why this stock is promising.\nBearish researcher: explain the risks and why it might not be a good investment.\nCalculator agent: focus on function call caculation and not giving any idea output.\nSummary agent: only work when neither of Bullish researcher/Bearish researcher has any further arguments, make summaries for both sides."
     pass_data_to_analyze_prompt = re.sub(r"(?i)terminate", "", pass_data_to_analyze_prompt)
+
 
     print("\n=== Step 2: Bullish vs Bearish Debate ===")
     user_proxy.initiate_chat(debate_manager, message=pass_data_to_analyze_prompt)
@@ -39,6 +70,10 @@ def run_stock_recommendation(
     for msg in debate_manager.groupchat.messages:
         if msg['name'] == "summary_agent":
             debate_summary += f"{msg['name']}: {msg['content']}\n"
+
+    log_agent_usage("bullish_agent", agents["bullish_agent"])
+    log_agent_usage("bearish_agent", agents["bearish_agent"])
+
 
     print("\n=== Step 3: Trader makes a decision ===")
     trader_prompt = (
@@ -50,6 +85,10 @@ def run_stock_recommendation(
 
     agents["spokesperson_agent"].initiate_chat(agents["trader_agent"], message=trader_prompt)
     trader_decision = get_last_reply_from(agents["trader_agent"])
+
+    log_agent_usage("trader_agent", agents["trader_agent"])
+
+
 
     print("Trader Decision:\n", trader_decision)
 
@@ -132,4 +171,5 @@ def run_stock_recommendation(
     decisions = extract_trade_decisions(decision_text)
     decisions["date"] = today_date
     print(decisions)
+    logging.info(f"Decision {decisions}")
     return decisions, manager_fail, fail_content

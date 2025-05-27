@@ -1,0 +1,28 @@
+2025-05-26 19:44:28 | INFO | Running portfolio simulation
+2025-05-26 19:44:28 | INFO | Tickers: ['GOOGL']
+2025-05-26 19:44:28 | INFO | Start date: 2024-01-01
+2025-05-26 19:44:28 | INFO | End date: 2024-03-29
+2025-05-26 19:44:28 | INFO | Position dict: {'GOOGL': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0]}
+2025-05-26 19:44:28 | INFO | Cumulative Return (CR): 0.08613534305845283
+2025-05-26 19:44:28 | INFO | Annualized Return (AR): 0.4068308234883402
+2025-05-26 19:59:53 | INFO | Running portfolio simulation
+2025-05-26 19:59:53 | INFO | Tickers: ['GOOGL']
+2025-05-26 19:59:53 | INFO | Start date: 2024-01-01
+2025-05-26 19:59:53 | INFO | End date: 2024-01-03
+2025-05-26 19:59:53 | INFO | Position dict: {'GOOGL': [1]}
+2025-05-26 19:59:53 | INFO | Cumulative Return (CR): -0.002742727350720786
+2025-05-26 19:59:53 | INFO | Annualized Return (AR): -0.4994845796379106
+2025-05-26 20:07:35 | INFO | Running portfolio simulation
+2025-05-26 20:07:35 | INFO | Tickers: ['GOOGL']
+2025-05-26 20:07:35 | INFO | Start date: 2024-01-01
+2025-05-26 20:07:35 | INFO | End date: 2024-01-03
+2025-05-26 20:07:35 | INFO | Position dict: {'GOOGL': [1]}
+2025-05-26 20:07:35 | INFO | Cumulative Return (CR): -0.002742727350720786
+2025-05-26 20:07:35 | INFO | Annualized Return (AR): -0.4994845796379106
+2025-05-26 20:08:35 | INFO | Running portfolio simulation
+2025-05-26 20:08:35 | INFO | Tickers: ['GOOGL']
+2025-05-26 20:08:35 | INFO | Start date: 2024-01-01
+2025-05-26 20:08:35 | INFO | End date: 2024-01-03
+2025-05-26 20:08:35 | INFO | Position dict: {'GOOGL': [1]}
+2025-05-26 20:08:35 | INFO | Cumulative Return (CR): -0.002742727350720786
+2025-05-26 20:08:35 | INFO | Annualized Return (AR): -0.4994845796379106

@@ -19,6 +19,24 @@ from agents.user_proxy import get_user_proxy
 
 from functions.tool_registration import register_tool
 from functions.stock_data import *
+import logging
+import os
+
+import logging
+import os
+
+# ==== 显式创建 logger ====
+logger = logging.getLogger("portfolio_logger")
+logger.setLevel(logging.INFO)
+
+# 添加文件 handler（只添加一次）
+if not logger.hasHandlers():
+    log_path = "portfolio_simulation.log"
+    fh = logging.FileHandler(log_path)
+    fh.setLevel(logging.INFO)
+    formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
 
 # === Set up UserProxyAgent ===
 user_proxy = get_user_proxy()
@@ -58,12 +76,12 @@ agents = {
 }
     
     
-tickers = ["AMZN"]
+tickers = ["A"]
 start = "2024-01-01"
-end = "2024-03-29"
+end = "2024-01-03"
 folder = r"D:\shawn_workspace\REAL LAB\REALLAB_FinLLM\Data\market_cap"
 
-result = run_portfolio_simulation(
+result, position_dict = run_portfolio_simulation(
     tickers=tickers,
     start=start,
     end=end,
@@ -73,5 +91,16 @@ result = run_portfolio_simulation(
     risk_profile="Neutral"
 )
 
+# 打印并记录结果
+logger.info(f"Running portfolio simulation")
+logger.info(f"Tickers: {tickers}")
+logger.info(f"Start date: {start}")
+logger.info(f"End date: {end}")
+logger.info(f"Position dict: {position_dict}")
+logger.info(f"Cumulative Return (CR): {result['CR']}")
+logger.info(f"Annualized Return (AR): {result['AR']}")
+
+
+print("position_dict:", position_dict)
 print("Cumulative Return (CR):", result["CR"])
 print("Annualized Return (AR):", result["AR"])

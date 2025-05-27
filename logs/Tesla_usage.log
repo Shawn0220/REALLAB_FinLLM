@@ -1,0 +1,10 @@
+2025-05-26 18:03:52,458 | INFO | [Tesla]  Date 2024-01-03
+2025-05-26 18:03:53,102 | INFO | [analyst_agent] Actual Usage (no cache): None
+2025-05-26 18:03:53,102 | INFO | [analyst_agent] Total  Usage (with cache): {'total_cost': 0.0154925, 'gpt-4o-2024-11-20': {'cost': 0.0154925, 'prompt_tokens': 2949, 'completion_tokens': 812, 'total_tokens': 3761}}
+2025-05-26 18:03:53,283 | INFO | [bullish_agent] Actual Usage (no cache): None
+2025-05-26 18:03:53,284 | INFO | [bullish_agent] Total  Usage (with cache): {'total_cost': 0.0141925, 'gpt-4o-2024-11-20': {'cost': 0.0141925, 'prompt_tokens': 3961, 'completion_tokens': 429, 'total_tokens': 4390}}
+2025-05-26 18:03:53,284 | INFO | [bearish_agent] Actual Usage (no cache): None
+2025-05-26 18:03:53,284 | INFO | [bearish_agent] Total  Usage (with cache): {'total_cost': 0.00871, 'gpt-4o-2024-11-20': {'cost': 0.00871, 'prompt_tokens': 2456, 'completion_tokens': 257, 'total_tokens': 2713}}
+2025-05-26 18:03:53,316 | INFO | [trader_agent] Actual Usage (no cache): None
+2025-05-26 18:03:53,316 | INFO | [trader_agent] Total  Usage (with cache): {'total_cost': 0.0040575, 'gpt-4o-2024-11-20': {'cost': 0.0040575, 'prompt_tokens': 1159, 'completion_tokens': 116, 'total_tokens': 1275}}
+2025-05-26 18:03:53,392 | INFO | Decision {'trader': 'BUY', 'risk': 'APPROVED', 'risk_tag': None, 'manager': 'EXECUTE_TRADE', 'date': '2024-01-03'}

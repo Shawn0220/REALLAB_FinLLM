@@ -5,7 +5,7 @@ ALPHAVANTAGE_API_KEY = os.environ.get("ALPHAVANTAGE_API_KEY")
 azure_key = os.environ.get("AZURE_OPENAI_API_KEY")
 azure_url = os.environ.get("AZURE_URL")
 
-MAX_articles = 10
+MAX_articles = 5
 
 # print(OPENAI_API_KEY)
 api_keys = {
@@ -16,6 +16,7 @@ api_keys = {
 
 llm_config = {
     "temperature": 0.5,
+    "cache_seed": None,
     "config_list": [
         {
             "model": "gpt-4o",

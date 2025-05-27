@@ -6,6 +6,61 @@ from data_collection.alvan_dc.ec_transcript_fetcher import fetch_single_ec_trans
 from config.api_config import MAX_articles
 from datetime import datetime
 from functions.local_data_loader import fetch_single_adjdaily_locally, fetch_fundamental_summary
+import re
+from datetime import datetime
+
+
+def normalize_time_string(t: str) -> str:
+    """
+    Normalize a time string into 'YYYYMMDDTHHMM' format.
+
+    - Accepts date with '-', '/', '.' separators
+    - Allows missing 'T' → defaults to T0000 (midnight)
+    - Extracts at most 4 digits from time part; left-pads if too short
+    - Validates date and time ranges
+
+    Examples:
+        '2024-01-08T23:59:59' → '20240108T2359'
+        '2024-01-08' → '20240108T0000'
+        '20240108' → '20240108T0000'
+        '2024/01/08T9' → '20240108T0009'
+
+    Raises:
+        ValueError if date/time format is invalid
+    """
+    # Step 1: Remove separators from date
+    t_clean = re.sub(r"[-/\.]", "", t)
+
+    # Step 2: Ensure 'T' is present; if not, default to midnight
+    if "T" not in t_clean:
+        t_clean += "T0000"
+
+    date_part, time_part = t_clean.split("T", 1)
+
+    # Step 3: Extract and validate date (first 8 digits)
+    if len(date_part) < 8 or not date_part[:8].isdigit():
+        raise ValueError(f"Date must start with 8 digits (YYYYMMDD), got: '{date_part}'")
+
+    date_part = date_part[:8]
+    try:
+        datetime.strptime(date_part, "%Y%m%d")
+    except ValueError:
+        raise ValueError(f"Invalid calendar date: {date_part}")
+
+    # Step 4: Normalize time part
+    time_digits = re.sub(r"\D", "", time_part)[:4].zfill(4)
+
+    if len(time_digits) != 4 or not time_digits.isdigit():
+        raise ValueError(f"Invalid time format after 'T': '{time_part}'")
+
+    hour, minute = int(time_digits[:2]), int(time_digits[2:])
+    if hour >= 24 or minute >= 60:
+        raise ValueError(f"Invalid time value: HH={hour}, MM={minute}")
+
+    return f"{date_part}T{time_digits}"
+
+
+
 
 # === Tool 1: Company Info ===
 def data_collect_company_info(stock_name: str) -> str:
@@ -85,6 +140,10 @@ def get_stock_news_sentiment(ticker: str, time_from: str, time_to: str, sort: st
     Synchronously fetch news for a single stock ticker.
     Internally calls the async `fetch_single_news` function.
     """
+    time_from = normalize_time_string(time_from)
+    time_to = normalize_time_string(time_to)
+    # print(time_from, "*********", time_to)
+
     full_result = asyncio.run(fetch_single_news(ticker, time_from, time_to, sort))
     simplified = {}
     

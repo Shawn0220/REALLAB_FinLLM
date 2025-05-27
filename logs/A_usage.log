@@ -1,0 +1,5 @@
+2025-05-26 20:08:50,620 | INFO | [A]  Date 2024-01-02
+2025-05-26 20:08:52,552 | INFO | HTTP Request: POST https://junanchen-aoai.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
+2025-05-26 20:09:02,698 | INFO | HTTP Request: POST https://junanchen-aoai.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
+2025-05-26 20:09:02,728 | INFO | [analyst_agent] Actual Usage (no cache): {'total_cost': 0.013812500000000002, 'gpt-4o-2024-11-20': {'cost': 0.013812500000000002, 'prompt_tokens': 2441, 'completion_tokens': 771, 'total_tokens': 3212}}
+2025-05-26 20:09:02,728 | INFO | [analyst_agent] Total  Usage (with cache): {'total_cost': 0.013812500000000002, 'gpt-4o-2024-11-20': {'cost': 0.013812500000000002, 'prompt_tokens': 2441, 'completion_tokens': 771, 'total_tokens': 3212}}
